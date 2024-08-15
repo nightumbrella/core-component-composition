@@ -1,27 +1,25 @@
-import { FC } from "react";
+// src/components/Pagination.tsx
+import React from 'react';
 
-type PaginationProp = {
+type PaginationProps = {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  siblingCount: number;
+  siblingCount?: number;
 };
 
-const Pagination: FC<PaginationProp> = ({
-  currentPage,
-  onPageChange,
-  siblingCount,
-  totalPages,
-}) => {
-  const DOTS = "...";
+const DOTS = '...';
 
-  const generatePageNumbers = () => {
-    const totalPageNumber = siblingCount + 5;
+const range = (start: number, end: number) => {
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+};
 
-    if (totalPageNumber >= totalPages) {
-      return Array.from({ length: totalPages }, (_, index) => index + 1);
-    }
-  };
+const generatePageNumbers = (currentPage: number, totalPages: number, siblingCount: number) => {
+  const totalPageNumbers = siblingCount + 5;
+
+  if (totalPageNumbers >= totalPages) {
+    return range(1, totalPages);
+  }
 
   const leftSiblingIndex = Math.max(currentPage - siblingCount, 1);
   const rightSiblingIndex = Math.min(currentPage + siblingCount, totalPages);
@@ -31,35 +29,30 @@ const Pagination: FC<PaginationProp> = ({
 
   const firstPageIndex = 1;
   const lastPageIndex = totalPages;
-  if (!showLeftEllipsis && showRightEllipsis) {
-    let leftItemCount = 3 + 2 * siblingCount;
-    let leftRange = Array.from(
-      { length: leftItemCount },
-      (_, index) => index + 1
-    );
 
-    return [...leftRange, DOTS, totalPages];
+  if (!showLeftEllipsis && showRightEllipsis) {
+    const leftRange = range(1, rightSiblingIndex);
+    return [...leftRange, DOTS, lastPageIndex];
   }
 
   if (showLeftEllipsis && !showRightEllipsis) {
-    let rightItemCount = 3 + 2 * siblingCount;
-    let rightRange = Array.from(
-      { length: rightItemCount },
-      (_, index) => totalPages - rightItemCount + 1 + index
-    );
-
+    const rightRange = range(leftSiblingIndex, totalPages);
     return [firstPageIndex, DOTS, ...rightRange];
   }
 
   if (showLeftEllipsis && showRightEllipsis) {
-    let middleRange = Array.from(
-      { length: siblingCount * 2 + 1 },
-      (_, index) => leftSiblingIndex + index
-    );
+    const middleRange = range(leftSiblingIndex, rightSiblingIndex);
     return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
   }
+};
 
-  const pageNumbers = generatePageNumbers();
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  siblingCount = 1,
+}) => {
+  const pageNumbers = generatePageNumbers(currentPage, totalPages, siblingCount);
 
   const handlePrevious = () => {
     if (currentPage > 1) {
@@ -72,26 +65,25 @@ const Pagination: FC<PaginationProp> = ({
       onPageChange(currentPage + 1);
     }
   };
+
   return (
-    <nav className="flex justify-center items-center space-x-2">
+    <nav className="flex justify-center items-center space-x-1 mt-4">
       <button
-        className="px-4 py-2 border rounded hover:bg-gray-200"
+        className={`px-3 py-1 border rounded ${currentPage === 1 ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-200'}`}
         onClick={handlePrevious}
         disabled={currentPage === 1}
       >
         Previous
       </button>
-      {pageNumbers?.map((page:any, index) =>
+      {pageNumbers?.map((page, index) =>
         page === DOTS ? (
-          <span key={index} className="px-4 py-2">
+          <span key={index} className="px-3 py-1">
             {DOTS}
           </span>
         ) : (
           <button
             key={page}
-            className={`px-4 py-2 border rounded ${
-              currentPage === page ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'
-            }`}
+            className={`px-3 py-1 border rounded ${currentPage === page ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
             onClick={() => onPageChange(page as number)}
           >
             {page}
@@ -99,7 +91,7 @@ const Pagination: FC<PaginationProp> = ({
         )
       )}
       <button
-        className="px-4 py-2 border rounded hover:bg-gray-200"
+        className={`px-3 py-1 border rounded ${currentPage === totalPages ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-200'}`}
         onClick={handleNext}
         disabled={currentPage === totalPages}
       >
@@ -108,3 +100,5 @@ const Pagination: FC<PaginationProp> = ({
     </nav>
   );
 };
+
+export default Pagination;
