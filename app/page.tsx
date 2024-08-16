@@ -11,6 +11,7 @@ export default function Home() {
     setCurrentPage(page);
     // Add any additional logic here, such as fetching new data based on the page number
   };
+
   return (
   <main>
  <div className="p-4">
@@ -21,3 +22,4 @@ export default function Home() {
   </main> 
   );
 }
+
